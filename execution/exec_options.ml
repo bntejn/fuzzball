@@ -110,6 +110,8 @@ let opt_trace_setup = ref false
 let opt_extra_env = Hashtbl.create 10
 let opt_skip_call_addr = ref []
 let opt_skip_func_addr = ref []
+let opt_symbolic_volatile_bytes = ref []
+let sv_eip_count = Hashtbl.create 0
 let opt_skip_call_addr_symbol = ref []
 let opt_skip_func_addr_symbol = ref []
 let opt_skip_call_addr_region = ref []
@@ -207,6 +209,11 @@ let add_delimited_pair opt char s =
 let add_delimited_num_str_pair opt char s =
   let (s1, s2) = split_string char s in
     opt := ((Int64.of_string s1), s2) :: !opt
+
+let add_delimited_num_num_str_triple opt char s =
+  let (s1, _s2) = split_string char s in
+  let (s2, s3) = split_string char _s2 in
+    opt := ((Int64.of_string s1), (Int64.of_string s2), s3) :: !opt
 
 let add_delimited_num_escstr_pair opt char s =
   let (s1, s2) = split_string char s in

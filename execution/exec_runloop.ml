@@ -32,7 +32,28 @@ let call_replacements fm last_eip eip =
 	 if ((canon_eip addr) = (canon_eip targ)) then Some (retval) else ret)
       None l
   in
-    match ((lookup eip      !opt_skip_func_addr),
+  let lookup_sv targ l =
+    List.fold_left
+      (fun ret (addr, var_addr, retval) -> 
+	 if ((canon_eip addr) = (canon_eip targ)) then (var_addr, retval)::ret else ret)
+      [] l
+  in
+  let l = lookup_sv eip !opt_symbolic_volatile_bytes in
+  if (List.length l) <> 0 then (
+    let new_count = 
+      if (Hashtbl.mem sv_eip_count eip) = true then (
+	let old_count = Hashtbl.find sv_eip_count eip in
+	old_count+1
+      ) else 1
+    in
+    Hashtbl.replace sv_eip_count eip new_count;
+    for i=0 to (List.length l)-1 do
+      let (addr, varname) = List.nth l i in
+      fm#store_symbolic_byte addr (Printf.sprintf "%s_%d" varname new_count);
+    done;
+  );
+    
+  match ((lookup eip      !opt_skip_func_addr),
 	   (lookup eip      !opt_skip_func_addr_symbol),
 	   (lookup eip      !opt_skip_func_addr_region),
 	   (lookup last_eip !opt_skip_call_addr),
@@ -56,7 +77,8 @@ let call_replacements fm last_eip eip =
       | (None, None, None, None, None, None, Some cfar_sym) ->
 	  Some (fun () -> fm#set_reg_fresh_region ret_reg cfar_sym)
       | _ -> failwith "Contradictory replacement options"
-
+  
+    
 let loop_detect = Hashtbl.create 1000
 
 let decode_insn_at fm gamma eipT =
