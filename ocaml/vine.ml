@@ -457,12 +457,12 @@ and format_typ ft t =
     open_box  0;
     (
             match t with
-	  REG_1 -> pp "reg1_t" 
-	| REG_8  -> pp "reg8_t"
-	| REG_16 -> pp "reg16_t"
-	| REG_32 -> pp "reg32_t"
-	| REG_64 -> pp "reg64_t"
-	| TString -> pp "string_t"
+	  REG_1 -> pp "r1" 
+	| REG_8  -> pp "r8"
+	| REG_16 -> pp "r16"
+	| REG_32 -> pp "r32"
+	| REG_64 -> pp "r64"
+	| TString -> pp "str"
 	| TMem(REG_32, Little) -> pp "mem32l_t"
 	| TMem(REG_64, Little) -> pp "mem64l_t"
 	| TMem _ -> failwith "Unsupported memory type"
@@ -642,7 +642,7 @@ let rec format_exp ft e =
        | Name l ->
 	   pp "name("; pp l; pp ")"
        | Cast(ct,t,e) ->
-	   pp "cast(";
+	   pp "@(";
 	   fe 0 e;
 	   pp (")"^casttype_to_string ct^":");
 	   format_typ ft t
