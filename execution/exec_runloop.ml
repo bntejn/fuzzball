@@ -44,10 +44,11 @@ let call_replacements fm last_eip eip =
     let (sv_l, store_func) = 
       match size with 
       | 8 -> (!opt_symbolic_volatile_byte, fm#store_symbolic_byte) 
+      | 32 -> (!opt_symbolic_volatile_word, fm#store_symbolic_word) 
       | 64 -> (!opt_symbolic_volatile_long, fm#store_symbolic_long)
       | _ -> failwith "unsupported volatile size"
     in
-      (* Vaibhav added this code to handle volatile byte *)
+      (* Vaibhav: store/increment the count of eip encounter *)
       let l = lookup_sv eip sv_l in
       if (List.length l) <> 0 then (
         let new_count = 
@@ -64,6 +65,7 @@ let call_replacements fm last_eip eip =
       );
   in
   volatile_store 8;
+  volatile_store 32;
   volatile_store 64;
     
   match ((lookup eip      !opt_skip_func_addr),

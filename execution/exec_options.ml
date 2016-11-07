@@ -111,6 +111,7 @@ let opt_extra_env = Hashtbl.create 10
 let opt_skip_call_addr = ref []
 let opt_skip_func_addr = ref []
 let opt_symbolic_volatile_byte = ref []
+let opt_symbolic_volatile_word = ref []
 let opt_symbolic_volatile_long = ref []
 let sv_eip_count = Hashtbl.create 0
 let opt_skip_call_addr_symbol = ref []
