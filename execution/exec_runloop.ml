@@ -29,29 +29,42 @@ let call_replacements fm last_eip eip =
   let lookup targ l =
     List.fold_left
       (fun ret (addr, retval) -> 
-	 if ((canon_eip addr) = (canon_eip targ)) then Some (retval) else ret)
+         if ((canon_eip addr) = (canon_eip targ)) then Some (retval) else ret)
       None l
   in
   let lookup_sv targ l =
     List.fold_left
       (fun ret (addr, var_addr, retval) -> 
-	 if ((canon_eip addr) = (canon_eip targ)) then (var_addr, retval)::ret else ret)
-      [] l
+         if ((canon_eip addr) = (canon_eip targ)) then (var_addr, retval)::ret else ret)
+          [] l
   in
-  let l = lookup_sv eip !opt_symbolic_volatile_bytes in
-  if (List.length l) <> 0 then (
-    let new_count = 
-      if (Hashtbl.mem sv_eip_count eip) = true then (
-	let old_count = Hashtbl.find sv_eip_count eip in
-	old_count+1
-      ) else 1
+
+
+  let volatile_store size = 
+    let (sv_l, store_func) = 
+      match size with 
+      | 8 -> (!opt_symbolic_volatile_byte, fm#store_symbolic_byte) 
+      | 64 -> (!opt_symbolic_volatile_long, fm#store_symbolic_long)
+      | _ -> failwith "unsupported volatile size"
     in
-    Hashtbl.replace sv_eip_count eip new_count;
-    for i=0 to (List.length l)-1 do
-      let (addr, varname) = List.nth l i in
-      fm#store_symbolic_byte addr (Printf.sprintf "%s_%d" varname new_count);
-    done;
-  );
+      (* Vaibhav added this code to handle volatile byte *)
+      let l = lookup_sv eip sv_l in
+      if (List.length l) <> 0 then (
+        let new_count = 
+          if (Hashtbl.mem sv_eip_count eip) = true then (
+        let old_count = Hashtbl.find sv_eip_count eip in
+        old_count+1
+          ) else 1
+        in
+        Hashtbl.replace sv_eip_count eip new_count;
+        for i=0 to (List.length l)-1 do
+          let (addr, varname) = List.nth l i in
+          store_func addr (Printf.sprintf "%s_%d" varname new_count);
+        done;
+      );
+  in
+  volatile_store 8;
+  volatile_store 64;
     
   match ((lookup eip      !opt_skip_func_addr),
 	   (lookup eip      !opt_skip_func_addr_symbol),

@@ -88,7 +88,8 @@ val opt_trace_setup : bool ref
 val opt_extra_env : (string, string) Hashtbl.t
 val opt_skip_call_addr : (int64 * int64) list ref
 val opt_skip_func_addr : (int64 * int64) list ref
-val opt_symbolic_volatile_bytes : (int64 * int64 * string) list ref
+val opt_symbolic_volatile_byte : (int64 * int64 * string) list ref
+val opt_symbolic_volatile_long : (int64 * int64 * string) list ref
 val sv_eip_count : (int64, int) Hashtbl.t
 val opt_skip_call_addr_symbol : (int64 * string) list ref
 val opt_skip_func_addr_symbol : (int64 * string) list ref

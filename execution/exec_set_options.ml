@@ -191,8 +191,12 @@ let symbolic_state_cmdline_opts =
        (add_delimited_num_str_pair opt_symbolic_bytes '='),
      "addr=var Make a memory byte symbolic");
     ("-symbolic-volatile-byte", Arg.String
-       (add_delimited_num_num_str_triple opt_symbolic_volatile_bytes ':'),
+       (add_delimited_num_num_str_triple opt_symbolic_volatile_byte ':'),
      "eip:addr:var Write a fresh symbolic byte at addr "^
+       "every time instruction at eip is executed");
+    ("-symbolic-volatile-long", Arg.String
+       (add_delimited_num_num_str_triple opt_symbolic_volatile_long ':'),
+     "eip:addr:var Write a fresh symbolic long at addr "^
        "every time instruction at eip is executed");
     ("-symbolic-short", Arg.String
        (add_delimited_num_str_pair opt_symbolic_shorts '='),
