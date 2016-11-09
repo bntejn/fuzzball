@@ -34,12 +34,10 @@ let call_replacements fm last_eip eip =
   in
   let lookup_sv targ l =
     List.fold_left
-      (fun ret (addr, var_addr, retval) -> 
-         if ((canon_eip addr) = (canon_eip targ)) then (var_addr, retval)::ret else ret)
+      (fun ret (addr, var_addr, var_name) -> 
+         if ((canon_eip addr) = (canon_eip targ)) then (var_addr, var_name)::ret else ret)
           [] l
   in
-
-
   let volatile_store size = 
     let (sv_l, store_func) = 
       match size with 
@@ -48,26 +46,26 @@ let call_replacements fm last_eip eip =
       | 64 -> (!opt_symbolic_volatile_long, fm#store_symbolic_long)
       | _ -> failwith "unsupported volatile size"
     in
-      (* Vaibhav: store/increment the count of eip encounter *)
-      let l = lookup_sv eip sv_l in
-      if (List.length l) <> 0 then (
-        let new_count = 
-          if (Hashtbl.mem sv_eip_count eip) = true then (
-        let old_count = Hashtbl.find sv_eip_count eip in
-        old_count+1
-          ) else 1
-        in
-        Hashtbl.replace sv_eip_count eip new_count;
-        for i=0 to (List.length l)-1 do
-          let (addr, varname) = List.nth l i in
-          store_func addr (Printf.sprintf "%s_%d" varname new_count);
-        done;
-      );
+    (* store/increment the count of eip encounter *)
+    let l = lookup_sv eip sv_l in
+    if (List.length l) <> 0 then (
+      let new_count = 
+        if (Hashtbl.mem sv_eip_count eip) = true then (
+          let old_count = Hashtbl.find sv_eip_count eip in
+          old_count+1
+        ) else 1
+      in
+      Hashtbl.replace sv_eip_count eip new_count;
+      for i=0 to (List.length l)-1 do
+        let (addr, var_name) = List.nth l i in
+        store_func addr (Printf.sprintf "%s_%d" var_name new_count);
+      done;
+    );
   in
   volatile_store 8;
   volatile_store 32;
   volatile_store 64;
-    
+  
   match ((lookup eip      !opt_skip_func_addr),
 	   (lookup eip      !opt_skip_func_addr_symbol),
 	   (lookup eip      !opt_skip_func_addr_region),

@@ -385,6 +385,8 @@ class virtual fragment_machine = object
   method virtual set_word_var_low_byte    : register_name -> int -> unit
   method virtual set_word_var_second_byte : register_name -> int -> unit
 
+  method virtual get_fresh_symbolic : string -> int -> Vine.exp
+  
   method virtual set_word_reg_symbolic : register_name -> string -> unit
   method virtual set_word_reg_concolic :
     register_name -> string -> int64 -> unit
@@ -587,6 +589,15 @@ struct
 
     val mutable snap = (V.VarHash.create 1, V.VarHash.create 1)
 
+    method get_fresh_symbolic name size = 
+      match size with
+        | 1  -> D.to_symbolic_1 (form_man#fresh_symbolic_1 name)
+        | 8  -> D.to_symbolic_8 (form_man#fresh_symbolic_8 name)
+        | 16 -> D.to_symbolic_16 (form_man#fresh_symbolic_16 name)
+        | 32 -> D.to_symbolic_32 (form_man#fresh_symbolic_32 name)
+        | 64 -> D.to_symbolic_64 (form_man#fresh_symbolic_64 name)
+        | _ -> failwith "Bad size in on_missing_symbol"
+    
     method init_prog (dl, sl) =
       List.iter
 	(fun ((n,s,t) as v) ->

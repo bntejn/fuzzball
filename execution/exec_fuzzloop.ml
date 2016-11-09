@@ -100,6 +100,20 @@ let fuzz start_eip opt_fuzz_start_eip end_eips
 	    fuzz_start_eip := eip;
 	    extra_setup := setup);
      fm#start_symbolic;
+
+     (* Create symbolic_volatile variables *)
+     for i = 1 to (Int64.to_int !opt_iteration_limit) do
+       List.iter ( fun (_, _, str) -> 
+	 ignore(fm#get_fresh_symbolic (Printf.sprintf "%s_%d" str i) 8);) 
+	 !opt_symbolic_volatile_byte;
+       List.iter ( fun (_, _, str) -> 
+	 ignore(fm#get_fresh_symbolic (Printf.sprintf "%s_%d" str i) 32);) 
+	 !opt_symbolic_volatile_word;
+       List.iter ( fun (_, _, str) -> 
+	 ignore(fm#get_fresh_symbolic (Printf.sprintf "%s_%d" str i) 64);) 
+	 !opt_symbolic_volatile_long;
+     done;
+
      if !opt_trace_setup then
        (Printf.printf "Setting up symbolic values:\n"; flush stdout);
      symbolic_init ();
